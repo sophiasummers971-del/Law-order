@@ -18,12 +18,19 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     return
   }
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Unknown error' }))
-    throw new Error(error.error || `HTTP ${res.status}`)
+  const text = await res.text()
+  let data: any = {}
+  try {
+    data = text ? JSON.parse(text) : {}
+  } catch {
+    data = { error: text }
   }
 
-  return res.json()
+  if (!res.ok) {
+    throw new Error(data.error || "HTTP " + res.status)
+  }
+
+  return data
 }
 
 export function setToken(token: string) {
